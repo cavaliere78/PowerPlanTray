@@ -159,19 +159,12 @@ $menu.Items.Add($openPowerOptions)
 
 
 # Esci
-# $exitItem = New-Object System.Windows.Forms.ToolStripMenuItem "Esci"
-# $exitItem.Add_Click({
-    # $notifyIcon.Visible = $false
-    # [System.Windows.Forms.Application]::Exit()
-# })
-# $menu.Items.Add($exitItem) | Out-Null
 $exitItem = New-Object System.Windows.Forms.ToolStripMenuItem "Esci"
 $exitItem.Add_Click({
-    Unregister-Event -SourceIdentifier "PowerPlanChanged" -ErrorAction SilentlyContinue
     $notifyIcon.Visible = $false
     [System.Windows.Forms.Application]::Exit()
 })
-$menu.Items.Add($exitItem)
+$menu.Items.Add($exitItem) | Out-Null
 
 
 
@@ -181,27 +174,15 @@ $notifyIcon.ContextMenuStrip = $menu
 # Primo aggiornamento
 Update-Icon
 
-# # Timer per aggiornamento automatico dell’icona ogni 2 secondi
-# $timer = New-Object System.Windows.Forms.Timer
-# $timer.Interval = 2000   # 2000 ms = 2 secondi
-# $timer.Add_Tick({
-    # Update-Icon
-# })
-# $timer.Start()
+# Timer per aggiornamento automatico dell’icona ogni 2 secondi
+$timer = New-Object System.Windows.Forms.Timer
+$timer.Interval = 2000   # 2000 ms = 2 secondi
+$timer.Add_Tick({
+    Update-Icon
+})
+$timer.Start()
 
-# --- WMI EVENT LISTENER: aggiorna icona quando cambia il profilo energetico ---
 
-$global:powerEvent = Register-WmiEvent -Class Win32_PowerManagementEvent `
-    -SourceIdentifier "PowerPlanChanged" `
-    -Action {
-        # Ogni evento WMI arriva in un thread separato ? rimanda al thread della UI
-        [System.Windows.Forms.Application]::OpenForms |
-            ForEach-Object {
-                $_.BeginInvoke({
-                    Update-Icon
-                })
-            }
-    }
 
 
 # Avvio loop WinForms
